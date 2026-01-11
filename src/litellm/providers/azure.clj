@@ -166,7 +166,8 @@
      "azure"
      #(let [start-time (System/currentTimeMillis)
             response (http/post url
-                                (conj {:headers {"api-key" (:api-key config)
+                                (conj {:headers {"Authorization" (:authorization config)
+                                                 "api-key" (:api-key config)
                                                  "Content-Type" "application/json"
                                                  "User-Agent" "litellm-clj/1.0.0"}
                                        :body (json/encode transformed-request)
@@ -219,6 +220,7 @@
     (let [url (build-chat-url config)
           response (http/post url
                               (conj {:headers {"api-key" (:api-key config)
+                                               "Authorization" (:authorization config)
                                                "Content-Type" "application/json"}
                                      :body (json/encode {:messages [{:role "user" :content "test"}]
                                                          :max_tokens 1})
@@ -264,6 +266,7 @@
       (try
         (let [response (http/post url
                                   {:headers {"api-key" (:api-key config)
+                                             "Authorization" (:authorization config)
                                              "Content-Type" "application/json"
                                              "User-Agent" "litellm-clj/1.0.0"}
                                    :body (json/encode transformed-request)
@@ -327,6 +330,7 @@
      #(let [start-time (System/currentTimeMillis)
             response (http/post url
                                 (conj {:headers {"api-key" (:api-key config)
+                                                 "Authorization" (:authorization config)
                                                  "Content-Type" "application/json"
                                                  "User-Agent" "litellm-clj/1.0.0"}
                                        :body (json/encode transformed-request)
@@ -374,9 +378,13 @@
   (when-not (:deployment config)
     (throw (ex-info "Azure OpenAI requires :deployment (deployment name)"
                     {:config config})))
-  (when-not (:api-key config)
-    (throw (ex-info "Azure OpenAI requires :api-key"
-                    {:config config})))
+  (when-not (or (:api-key config)
+                (:authorization config)
+                )
+    (throw (ex-info "Azure OpenAI requires :api-key  or :authorization"
+                    {:config config}))
+    
+    )
   config)
 
 (defn test-azure-connection
