@@ -7,6 +7,15 @@
             [clojure.tools.logging :as log]
             [clojure.core.async :as async :refer [go >!]]))
 
+(defn- ?assoc
+  "Same as assoc, but skip the assoc if v is nil"
+  [m & kvs]
+  (->> kvs
+       (partition 2)
+       (filter second)
+       (map vec)
+       (into m)))
+
 ;; ============================================================================
 ;; Message Transformations (same as OpenAI)
 ;; ============================================================================
@@ -166,14 +175,18 @@
      "azure"
      #(let [start-time (System/currentTimeMillis)
             response (http/post url
-                                (conj {:headers {"Authorization" (:authorization config)
-                                                 "api-key" (:api-key config)
-                                                 "Content-Type" "application/json"
-                                                 "User-Agent" "litellm-clj/1.0.0"}
+                                (conj {:headers (?assoc {"Content-Type" "application/json"
+                                                         "User-Agent" "litellm-clj/1.0.0"}
+                                                        "Authorization" (:authorization config)
+                                                        "api-key" (:api-key config))
+
+                                       
+
                                        :body (json/encode transformed-request)
                                        :timeout (:timeout config 30000)
                                        :async? true
                                        :as :json}
+                                      
                                       (when thread-pool
                                         {:executor thread-pool})))
             duration (- (System/currentTimeMillis) start-time)]
@@ -219,9 +232,11 @@
     ;; We'll just try a minimal request to check connectivity
     (let [url (build-chat-url config)
           response (http/post url
-                              (conj {:headers {"api-key" (:api-key config)
-                                               "Authorization" (:authorization config)
-                                               "Content-Type" "application/json"}
+                              (conj {:headers 
+                                     (?assoc {"Content-Type" "application/json"}
+                                             "Authorization" (:authorization config)
+                                             "api-key" (:api-key config)
+                                             )
                                      :body (json/encode {:messages [{:role "user" :content "test"}]
                                                          :max_tokens 1})
                                      :timeout 5000
@@ -265,10 +280,10 @@
     (go
       (try
         (let [response (http/post url
-                                  {:headers {"api-key" (:api-key config)
-                                             "Authorization" (:authorization config)
-                                             "Content-Type" "application/json"
-                                             "User-Agent" "litellm-clj/1.0.0"}
+                                  {:headers (?assoc {"Content-Type" "application/json"
+                                                     "User-Agent" "litellm-clj/1.0.0"}
+                                                    "Authorization" (:authorization config)
+                                                    "api-key" (:api-key config))
                                    :body (json/encode transformed-request)
                                    :timeout (:timeout config 30000)
                                    :as :stream})]
@@ -329,10 +344,10 @@
      "azure"
      #(let [start-time (System/currentTimeMillis)
             response (http/post url
-                                (conj {:headers {"api-key" (:api-key config)
-                                                 "Authorization" (:authorization config)
-                                                 "Content-Type" "application/json"
-                                                 "User-Agent" "litellm-clj/1.0.0"}
+                                (conj {:headers (?assoc {"Content-Type" "application/json"
+                                                         "User-Agent" "litellm-clj/1.0.0"}
+                                                        "Authorization" (:authorization config)
+                                                        "api-key" (:api-key config))
                                        :body (json/encode transformed-request)
                                        :timeout (:timeout config 30000)
                                        :async? true
