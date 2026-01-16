@@ -181,9 +181,9 @@ For simple, direct provider calls:
 ---
 
 ## Documentation
-- **[API Guide](docs/API_GUIDE.md)** - Comprehensive API reference
-- **[Error Handling](docs/ERROR_HANDLING.md)** - Examples related to error handling
-- **[Streaming Guide](docs/STREAMING_GUIDE.md)** - Detailed streaming documentation
+- **[API Guide](doc/api-guide.md)** - Comprehensive API reference
+- **[Error Handling](doc/error_handling.md)** - Examples related to error handling
+- **[Streaming Guide](doc/streaming.md)** - Detailed streaming documentation
 - **[Examples](examples/)** - More code examples
 
 ---
