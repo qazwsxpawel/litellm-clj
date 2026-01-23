@@ -179,14 +179,10 @@
                                                          "User-Agent" "litellm-clj/1.0.0"}
                                                         "Authorization" (:authorization config)
                                                         "api-key" (:api-key config))
-
-                                       
-
                                        :body (json/encode transformed-request)
                                        :timeout (:timeout config 30000)
                                        :async? true
                                        :as :json}
-                                      
                                       (when thread-pool
                                         {:executor thread-pool})))
             duration (- (System/currentTimeMillis) start-time)]
@@ -235,8 +231,7 @@
                               (conj {:headers 
                                      (?assoc {"Content-Type" "application/json"}
                                              "Authorization" (:authorization config)
-                                             "api-key" (:api-key config)
-                                             )
+                                             "api-key" (:api-key config))
                                      :body (json/encode {:messages [{:role "user" :content "test"}]
                                                          :max_tokens 1})
                                      :timeout 5000
@@ -394,12 +389,9 @@
     (throw (ex-info "Azure OpenAI requires :deployment (deployment name)"
                     {:config config})))
   (when-not (or (:api-key config)
-                (:authorization config)
-                )
+                (:authorization config))
     (throw (ex-info "Azure OpenAI requires :api-key  or :authorization"
-                    {:config config}))
-    
-    )
+                    {:config config})))
   config)
 
 (defn test-azure-connection
