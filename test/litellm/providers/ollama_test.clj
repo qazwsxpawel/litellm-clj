@@ -1,5 +1,5 @@
 (ns litellm.providers.ollama-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is testing]]
             [litellm.providers.ollama :as ollama]))
 
 ;; ============================================================================
