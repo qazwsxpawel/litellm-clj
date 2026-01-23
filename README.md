@@ -49,7 +49,7 @@ LiteLLM Clojure provides a unified, idiomatic Clojure interface for interacting 
 | OpenRouter   | ✅ Supported | All OpenRouter models                      | ✅               | ✅        |
 | Google Gemini| ✅ Supported | Gemini Pro, Gemini Pro Vision, Gemini Ultra| ❌               | ✅        |
 | Mistral      | ✅ Supported | Mistral Small/Medium/Large, Codestral, Magistral | ✅               | ✅        |
-| Ollama       | ✅ Supported | Local models                               | ❌               | ✅        |
+| Ollama       | ✅ Supported | Local models                               | ✅               | ✅        |
 
 ### Optional Providers
 
@@ -62,7 +62,7 @@ AWS Bedrock support is available as an optional module to avoid pulling in AWS S
 To use Bedrock, add the following to your `deps.edn`:
 
 ```clojure
-{:deps {tech.unravel/litellm-clj {:mvn/version "0.3.0-alpha"}
+{:deps {tech.unravel/litellm-clj {:mvn/version "0.3.0-alpha.2"}
 
         ;; AWS Bedrock dependencies
         com.cognitect.aws/api {:mvn/version "0.8.692"}
@@ -101,7 +101,7 @@ Then require and register the provider:
 Add to your `deps.edn`:
 
 ```clojure
-{:deps {tech.unravel/litellm-clj {:mvn/version "0.3.0-alpha"}}}
+{:deps {tech.unravel/litellm-clj {:mvn/version "0.3.0-alpha.2"}}}
 ```
 
 ### Using Leiningen
@@ -109,7 +109,7 @@ Add to your `deps.edn`:
 Add to your `project.clj`:
 
 ```clojure
-[tech.unravel/litellm-clj "0.3.0-alpha"]
+[tech.unravel/litellm-clj "0.3.0-alpha.2"]
 ```
 
 ---

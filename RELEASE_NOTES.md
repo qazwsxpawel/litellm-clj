@@ -1,3 +1,11 @@
+# v0.3.0-alpha.2
+- Ollama function calling / tools support
+- Azure provider: hanging parenthesis fix
+- Azure AD authentication support
+- Bedrock provider moved to optional contrib module
+
+---
+
 # v0.3.0-alpha.1
 - Add support for Reasoning tokens
 - Add support for Embeddings API
