@@ -1,0 +1,9 @@
+{:paths ["src"]
+
+ :deps {;; AWS Bedrock dependencies
+        com.cognitect.aws/api {:mvn/version "0.8.692"}
+        com.cognitect.aws/endpoints {:mvn/version "1.1.12.772"}
+        com.cognitect.aws/bedrock-runtime {:mvn/version "871.2.32.2"}}
+
+ :aliases
+ {:test {:extra-paths ["test"]}}}

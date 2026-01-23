@@ -1,18 +1,21 @@
 (ns litellm.providers.bedrock
   "AWS Amazon Bedrock provider implementation for LiteLLM.
-   
+
    Bedrock is a managed AWS service that provides access to multiple AI models
    through the unified Converse API, including:
    - Anthropic Claude models
-   - Amazon Nova models  
+   - Amazon Nova models
    - Meta Llama models
    - Mistral models
    - And more
-   
+
    Authentication is handled via AWS credentials (environment variables,
-   IAM roles, or explicit configuration)."
+   IAM roles, or explicit configuration).
+
+   This namespace self-registers with litellm.providers.core when required."
   (:require [litellm.streaming :as streaming]
             [litellm.errors :as errors]
+            [litellm.providers.core :as providers]
             [cognitect.aws.client.api :as aws]
             [cognitect.aws.credentials :as credentials]
             [cheshire.core :as json]
@@ -508,3 +511,39 @@
          :provider "bedrock"
          :error (.getMessage e)
          :error-type (type e)}))))
+
+;; ============================================================================
+;; Provider Registration
+;; ============================================================================
+;; Register this provider with litellm.providers.core multimethods.
+;; This happens automatically when this namespace is required.
+
+(defmethod providers/transform-request :bedrock [provider-name request config]
+  (transform-request-impl provider-name request config))
+
+(defmethod providers/make-request :bedrock [provider-name transformed-request thread-pool telemetry config]
+  (make-request-impl provider-name transformed-request thread-pool telemetry config))
+
+(defmethod providers/make-streaming-request :bedrock [provider-name transformed-request thread-pool config]
+  (make-streaming-request-impl provider-name transformed-request thread-pool config))
+
+(defmethod providers/transform-response :bedrock [provider-name response]
+  (transform-response-impl provider-name response))
+
+(defmethod providers/transform-streaming-chunk :bedrock [provider-name chunk]
+  (transform-streaming-chunk-impl provider-name chunk))
+
+(defmethod providers/supports-streaming? :bedrock [_provider-name]
+  (supports-streaming-impl :bedrock))
+
+(defmethod providers/supports-function-calling? :bedrock [_provider-name]
+  (supports-function-calling-impl :bedrock))
+
+(defmethod providers/get-rate-limits :bedrock [_provider-name]
+  (get-rate-limits-impl :bedrock))
+
+(defmethod providers/health-check :bedrock [provider-name thread-pool config]
+  (health-check-impl provider-name thread-pool config))
+
+(defmethod providers/get-cost-per-token :bedrock [provider-name model]
+  (get-cost-per-token-impl provider-name model))
