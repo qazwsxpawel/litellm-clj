@@ -7,6 +7,38 @@
             [clojure.string :as str]))
 
 ;; ============================================================================
+;; Tool/Function Calling Transformations
+;; ============================================================================
+
+(defn transform-tools
+  "Transform tools to Ollama format (OpenAI-compatible)"
+  [tools]
+  (when tools
+    (mapv (fn [tool]
+            {:type (or (:type tool) "function")
+             :function (select-keys (:function tool) [:name :description :parameters])})
+          tools)))
+
+(defn transform-tool-choice
+  "Transform tool choice to Ollama format"
+  [tool-choice]
+  (cond
+    (keyword? tool-choice) (name tool-choice)
+    (map? tool-choice) tool-choice
+    :else tool-choice))
+
+(defn transform-tool-calls
+  "Transform Ollama tool calls to standard format"
+  [tool-calls]
+  (when tool-calls
+    (mapv (fn [tool-call]
+            {:id (:id tool-call)
+             :type (or (:type tool-call) "function")
+             :function {:name (get-in tool-call [:function :name])
+                        :arguments (get-in tool-call [:function :arguments])}})
+          tool-calls)))
+
+;; ============================================================================
 ;; Message Transformations
 ;; ============================================================================
 
@@ -14,8 +46,21 @@
   "Transform messages to Ollama chat format"
   [messages]
   (mapv (fn [msg]
-          {:role (name (:role msg))
-           :content (:content msg)})
+          (let [role (name (:role msg))
+                base {:role role}]
+            (cond-> base
+              ;; Regular content
+              (:content msg) (assoc :content (:content msg))
+              ;; Tool call ID for tool response messages
+              (:tool-call-id msg) (assoc :tool_call_id (:tool-call-id msg))
+              ;; Tool calls from assistant
+              (:tool-calls msg) (assoc :tool_calls
+                                       (mapv (fn [tc]
+                                               {:id (:id tc)
+                                                :type (or (:type tc) "function")
+                                                :function {:name (get-in tc [:function :name])
+                                                           :arguments (get-in tc [:function :arguments])}})
+                                             (:tool-calls msg))))))
         messages))
 
 (defn transform-messages-for-generate
@@ -35,15 +80,18 @@
   "Transform Ollama chat response to standard format"
   [response]
   (let [body (:body response)
-        message (get-in body [:message])]
+        message (get-in body [:message])
+        tool-calls (:tool_calls message)
+        has-tool-calls (seq tool-calls)]
     {:id (str "ollama-" (java.util.UUID/randomUUID))
      :object "chat.completion"
      :created (quot (System/currentTimeMillis) 1000)
      :model (get body :model)
      :choices [{:index 0
-                :message {:role :assistant
-                          :content (:content message)}
-                :finish-reason :stop}]
+                :message (cond-> {:role :assistant
+                                  :content (:content message)}
+                           has-tool-calls (assoc :tool-calls (transform-tool-calls tool-calls)))
+                :finish-reason (if has-tool-calls :tool_calls :stop)}]
      :usage {:prompt-tokens (get-in body [:prompt_eval_count] 0)
              :completion-tokens (get-in body [:eval_count] 0)
              :total-tokens (+ (get-in body [:prompt_eval_count] 0)
@@ -129,23 +177,25 @@
   "Ollama-specific transform-request implementation"
   [provider-name request config]
   (let [original-model (:model request)
-        is-chat (str/starts-with? original-model "ollama_chat/")
+        ;; Use chat API if explicitly requested OR if tools are present (tools require chat API)
+        has-tools (or (:tools request) (:tool-choice request))
+        is-chat (or (str/starts-with? original-model "ollama_chat/") has-tools)
         model (extract-model-name original-model)
-        actual-model (if is-chat 
-                       (if (str/starts-with? original-model "ollama_chat/")
-                         (subs original-model (count "ollama_chat/"))
-                         model)
+        actual-model (if (str/starts-with? original-model "ollama_chat/")
+                       (subs original-model (count "ollama_chat/"))
                        model)
         messages (:messages request)]
-    
+
     (if is-chat
-      ;; Chat API format
+      ;; Chat API format (supports tools)
       (cond-> {:model actual-model
                :messages (transform-messages-for-chat messages)
                :stream (:stream request false)}
-        (:format request) (assoc :format (:format request)))
-      
-      ;; Generate API format
+        (:format request) (assoc :format (:format request))
+        (:tools request) (assoc :tools (transform-tools (:tools request)))
+        (:tool-choice request) (assoc :tool_choice (transform-tool-choice (:tool-choice request))))
+
+      ;; Generate API format (no tool support)
       (cond-> {:model actual-model
                :prompt (transform-messages-for-generate messages)
                :stream (:stream request false)
@@ -197,9 +247,10 @@
   true)
 
 (defn supports-function-calling-impl
-  "Ollama-specific supports-function-calling? implementation"
+  "Ollama-specific supports-function-calling? implementation.
+   Ollama supports function calling via its chat API with OpenAI-compatible tool format."
   [provider-name]
-  false)
+  true)
 
 (defn get-rate-limits-impl
   "Ollama-specific get-rate-limits implementation"
