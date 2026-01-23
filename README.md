@@ -51,9 +51,41 @@ LiteLLM Clojure provides a unified, idiomatic Clojure interface for interacting 
 | Mistral      | ✅ Supported | Mistral Small/Medium/Large, Codestral, Magistral | ✅               | ✅        |
 | Ollama       | ✅ Supported | Local models                               | ❌               | ✅        |
 
+### Optional Providers
+
+These providers require additional dependencies and must be explicitly added to your project.
+
+#### AWS Bedrock
+
+AWS Bedrock support is available as an optional module to avoid pulling in AWS SDK dependencies for users who don't need it.
+
+To use Bedrock, add the following to your `deps.edn`:
+
+```clojure
+{:deps {tech.unravel/litellm-clj {:mvn/version "0.3.0-alpha"}
+
+        ;; AWS Bedrock dependencies
+        com.cognitect.aws/api {:mvn/version "0.8.692"}
+        com.cognitect.aws/endpoints {:mvn/version "1.1.12.772"}
+        com.cognitect.aws/bedrock-runtime {:mvn/version "871.2.32.2"}}}
+```
+
+Then require and register the provider:
+
+```clojure
+(require '[litellm.providers.bedrock])  ; Registers the :bedrock provider
+
+;; Now you can use bedrock
+(require '[litellm.core :as llm])
+
+(llm/completion :bedrock "anthropic.claude-3-haiku-20240307-v1:0"
+  {:messages [{:role :user :content "Hello"}]
+   :max-tokens 100}
+  {:region "us-east-1"})  ; Uses AWS credentials from environment
+```
+
 ### Planned Providers
 
-- AWS Bedrock
 - Cohere
 - Hugging Face
 - Together AI

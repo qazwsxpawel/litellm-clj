@@ -10,8 +10,7 @@
             [litellm.providers.mistral :as mistral]
             [litellm.providers.ollama :as ollama]
             [litellm.providers.openrouter :as openrouter]
-            [litellm.providers.azure :as azure]
-            [litellm.providers.bedrock :as bedrock]))
+            [litellm.providers.azure :as azure]))
 
 ;; ============================================================================
 ;; Provider Multimethods and Implementations
@@ -45,9 +44,6 @@
 (defmethod transform-request :azure [provider-name request config]
   (azure/transform-request-impl provider-name request config))
 
-(defmethod transform-request :bedrock [provider-name request config]
-  (bedrock/transform-request-impl provider-name request config))
-
 ;; make-request
 ;; ----------------------------------------------------------------------------
 
@@ -76,9 +72,6 @@
 (defmethod make-request :azure [provider-name transformed-request thread-pool telemetry config]
   (azure/make-request-impl provider-name transformed-request thread-pool telemetry config))
 
-(defmethod make-request :bedrock [provider-name transformed-request thread-pool telemetry config]
-  (bedrock/make-request-impl provider-name transformed-request thread-pool telemetry config))
-
 ;; make-streaming-request
 ;; ----------------------------------------------------------------------------
 
@@ -100,9 +93,6 @@
 
 (defmethod make-streaming-request :azure [provider-name transformed-request thread-pool config]
   (azure/make-streaming-request-impl provider-name transformed-request thread-pool config))
-
-(defmethod make-streaming-request :bedrock [provider-name transformed-request thread-pool config]
-  (bedrock/make-streaming-request-impl provider-name transformed-request thread-pool config))
 
 ;; transform-response
 ;; ----------------------------------------------------------------------------
@@ -132,9 +122,6 @@
 (defmethod transform-response :azure [provider-name response]
   (azure/transform-response-impl provider-name response))
 
-(defmethod transform-response :bedrock [provider-name response]
-  (bedrock/transform-response-impl provider-name response))
-
 ;; transform-streaming-chunk
 ;; ----------------------------------------------------------------------------
 
@@ -156,9 +143,6 @@
 
 (defmethod transform-streaming-chunk :azure [provider-name chunk]
   (azure/transform-streaming-chunk-impl provider-name chunk))
-
-(defmethod transform-streaming-chunk :bedrock [provider-name chunk]
-  (bedrock/transform-streaming-chunk-impl provider-name chunk))
 
 ;; supports-streaming?
 ;; ----------------------------------------------------------------------------
@@ -190,9 +174,6 @@
 (defmethod supports-streaming? :azure [provider-name]
   (azure/supports-streaming-impl provider-name))
 
-(defmethod supports-streaming? :bedrock [provider-name]
-  (bedrock/supports-streaming-impl provider-name))
-
 ;; supports-function-calling?
 ;; ----------------------------------------------------------------------------
 
@@ -222,9 +203,6 @@
 
 (defmethod supports-function-calling? :azure [provider-name]
   (azure/supports-function-calling-impl provider-name))
-
-(defmethod supports-function-calling? :bedrock [provider-name]
-  (bedrock/supports-function-calling-impl provider-name))
 
 ;; get-rate-limits
 ;; ----------------------------------------------------------------------------
@@ -258,9 +236,6 @@
 (defmethod get-rate-limits :azure [provider-name]
   (azure/get-rate-limits-impl provider-name))
 
-(defmethod get-rate-limits :bedrock [provider-name]
-  (bedrock/get-rate-limits-impl provider-name))
-
 ;; health-check
 ;; ----------------------------------------------------------------------------
 
@@ -288,9 +263,6 @@
 
 (defmethod health-check :azure [provider-name thread-pool config]
   (azure/health-check-impl provider-name thread-pool config))
-
-(defmethod health-check :bedrock [provider-name thread-pool config]
-  (bedrock/health-check-impl provider-name thread-pool config))
 
 ;; get-cost-per-token
 ;; ----------------------------------------------------------------------------
@@ -322,9 +294,6 @@
 
 (defmethod get-cost-per-token :azure [provider-name model]
   (azure/get-cost-per-token-impl provider-name model))
-
-(defmethod get-cost-per-token :bedrock [provider-name model]
-  (bedrock/get-cost-per-token-impl provider-name model))
 
 ;; transform-embedding-request
 ;; ----------------------------------------------------------------------------

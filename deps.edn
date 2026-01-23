@@ -14,12 +14,7 @@
         org.clojure/core.async {:mvn/version "1.6.681"}
 
         ;; Schema validation
-        metosin/malli {:mvn/version "0.13.0"}
-
-        ;; AWS Bedrock
-        com.cognitect.aws/api {:mvn/version "0.8.692"}
-        com.cognitect.aws/endpoints {:mvn/version "1.1.12.772"}
-        com.cognitect.aws/bedrock-runtime {:mvn/version "871.2.32.2"}}
+        metosin/malli {:mvn/version "0.13.0"}}
 
  :aliases
  {:dev {:extra-paths ["dev" "test"]
@@ -57,4 +52,10 @@
                         :main-class litellm.main}}
 
   :outdated {:replace-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
-             :main-opts ["-m" "antq.core"]}}}
+             :main-opts ["-m" "antq.core"]}
+
+  ;; Optional: AWS Bedrock provider
+  :bedrock {:extra-paths ["contrib/bedrock/src" "contrib/bedrock/test"]
+            :extra-deps {com.cognitect.aws/api {:mvn/version "0.8.692"}
+                         com.cognitect.aws/endpoints {:mvn/version "1.1.12.772"}
+                         com.cognitect.aws/bedrock-runtime {:mvn/version "871.2.32.2"}}}}}
