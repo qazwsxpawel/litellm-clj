@@ -67,14 +67,20 @@
 (defn transform-generation-config
   "Transform generation config to Gemini format"
   [request]
-  (let [config {}]
+  (let [config {}
+        provider-specific (-> request :io.prnc/provider-specific :generation-config)]
     (cond-> config
       (:temperature request) (assoc :temperature (:temperature request))
       (:top-p request) (assoc :topP (:top-p request))
       (:max-tokens request) (assoc :maxOutputTokens (:max-tokens request))
       (:stop request) (assoc :stopSequences (if (string? (:stop request))
                                               [(:stop request)]
-                                              (:stop request))))))
+                                              (:stop request)))
+      ;; PROVIDER SPECIFIC
+      (:response-mime-type provider-specific) (assoc :responseMimeType
+                                                (:response-mime-type provider-specific))
+      (:response-json-schema provider-specific) (assoc :responseJsonSchema
+                                                  (:response-json-schema provider-specific)))))
 
 ;; ============================================================================
 ;; Response Transformations

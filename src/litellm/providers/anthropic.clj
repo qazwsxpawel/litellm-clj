@@ -233,10 +233,11 @@
                          (:thinking request) (transform-thinking-config (:thinking request))
                          (:reasoning-effort request) (reasoning-effort->thinking-config (:reasoning-effort request))
                          :else nil)
-        transformed {:model mapped-model
-                     :max_tokens (:max-tokens request 1024)
-                     :stream (:stream request false)}]
-    
+        transformed (merge {:model mapped-model
+                            :max_tokens (:max-tokens request 1024)
+                            :stream (:stream request false)}
+                      (:io.prnc/provider-specific request))]
+
     ;; Add system prompt, messages, tools, thinking if present
     ;; Only add one of temperature or top_p (Anthropic constraint)
     (cond-> transformed

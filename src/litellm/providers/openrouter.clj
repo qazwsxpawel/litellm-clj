@@ -129,16 +129,17 @@
   "OpenRouter-specific transform-request implementation"
   [provider-name request config]
   (let [model (:model request)
-        transformed {:model model
-                    :messages (transform-messages (:messages request))
-                    :max_tokens (:max-tokens request)
-                    :temperature (:temperature request)
-                    :top_p (:top-p request)
-                    :frequency_penalty (:frequency-penalty request)
-                    :presence_penalty (:presence-penalty request)
-                    :stop (:stop request)
-                    :stream (:stream request false)}]
-    
+        transformed (merge {:model model
+                            :messages (transform-messages (:messages request))
+                            :max_tokens (:max-tokens request)
+                            :temperature (:temperature request)
+                            :top_p (:top-p request)
+                            :frequency_penalty (:frequency-penalty request)
+                            :presence_penalty (:presence-penalty request)
+                            :stop (:stop request)
+                            :stream (:stream request false)}
+                      (:io.prnc/provider-specific request))]
+
     ;; Add function calling if present
     (cond-> transformed
       (:tools request) (assoc :tools (transform-tools (:tools request)))

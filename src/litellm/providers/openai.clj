@@ -157,9 +157,11 @@
   "OpenAI-specific transform-request implementation"
   [provider-name request config]
   (let [model (:model request)
-        base {:model model
-              :messages (transform-messages (:messages request))}]
-    
+        base (merge
+               {:model model
+                :messages (transform-messages (:messages request))}
+               (:io.prnc/provider-specific request))]
+
     ;; Add optional parameters only if they are not nil
     (cond-> base
       (:max-tokens request) (assoc :max_completion_tokens (:max-tokens request))
